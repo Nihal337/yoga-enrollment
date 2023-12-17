@@ -5,14 +5,23 @@ function AdmissionForm() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [batch, setBatch] = useState("");
+  const [paid, setPaid] = useState(false);
+  const [enrollDate, setEnrollDate] = useState("");
   const [error, setError] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (age < 18 || age > 65) {
+      setError("Age should be between 18 and 65");
+      return;
+    }
+
     setError(null);
     setPaymentStatus(null);
-    const userData = { name, age, batch };
+
+    const userData = { name, age, batch, paid, enrollDate };
 
     try {
       const response = await axios.post(
@@ -22,15 +31,14 @@ function AdmissionForm() {
       if (response.data.paymentResult.success) {
         setPaymentStatus("Payment successful");
       } else {
-        console.log(response.data);
         setPaymentStatus("Payment failed");
       }
     } catch (error) {
-      if (error.response && error.response.data.error) {
-        setError(error.response.data.error);
-      } else {
-        setError("Error submitting form");
-      }
+      setError(
+        error.response && error.response.data.error
+          ? error.response.data.error
+          : "Error submitting form"
+      );
     }
   };
 
@@ -89,9 +97,32 @@ function AdmissionForm() {
           </label>
         </div>
         <div className="flex flex-wrap">
+          <label className="block w-full">
+            <span className="text-gray-700">Enrollment Date:</span>
+            <input
+              className="w-full px-4 py-2 mt-2 border-2 border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+              type="date"
+              value={enrollDate}
+              onChange={(e) => setEnrollDate(e.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <div className="flex flex-wrap">
+          <label className="block w-full">
+            <span className="text-gray-700">Have you paid for this month?</span>
+            <input
+              className="mt-2"
+              type="checkbox"
+              checked={paid}
+              onChange={(e) => setPaid(e.target.checked)}
+            />
+          </label>
+        </div>
+        <div className="flex flex-wrap">
           <button
             type="submit"
-            className="w-full px-4 py-2 text-white bg-purple-500 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full px-4 py-2 mt-2 font-bold text-white bg-purple-600 hover:bg-purple-800 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
             Submit
           </button>
